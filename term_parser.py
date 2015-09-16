@@ -1,7 +1,10 @@
 # parse terms
 
+OPERATORS = ["+", "-", "*", "/"]
+
 verbose = False
-input = " ( 12 + 7 ) * 10"
+
+input = ""
 pos = 0
 
 def debug(message):
@@ -50,7 +53,7 @@ def readOperator():
     if not hasData():
         return ""
     c = getChar()
-    if c in ["+", "-", "*", "/"]:
+    if c in OPERATORS:
         readChar()
         return c
     return ""
