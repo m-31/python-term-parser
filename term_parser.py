@@ -1,6 +1,10 @@
 # parse terms
 
-OPERATORS = ["+", "-", "*", "/"]
+INFIX_OPERATORS = ["+", "-", "*", "/"]
+PREFIX_OPERATORS = ["+", "-"]
+OPERATORS = INFIX_OPERATORS
+
+PREFERENCES = { "+": 1, "-": 1, "*": 2, "/": 2}
 
 verbose = False
 
@@ -48,6 +52,11 @@ def readConstant():
         c = c + readChar()
     return c    
 
+def getPreference(operator):
+    if len(operator) == 0:
+        return 0
+    return PREFERENCES[operator]
+
 def readOperator():
     skipWhitespace()
     if not hasData():
@@ -83,16 +92,17 @@ def readMaximalTerm():
     op1 = readOperator()
     while len(op1) > 0:
         t2 = readMinimalTerm()
-        assert len(t2) != 0
-        t1 = [op1, t1, t2]
-        op1 = readOperator()
-        #if len(op2) == 0:
-        #    return [op1, t1, t2]
-        #t1 = [op1, t1, t2]
-        #op1 = op2
-        #t2 = readMinimalTerm()
-        #assert len(t2) > 0
-        #return [op1, t1, t2]
+        assert len(t2) > 0
+        op2 = readOperator()
+        if len(op2) == 0:
+            return [op1, t1, t2]
+        if getPreference(op2) <= getPreference(op1):
+            t1 = [op1, t1, t2]
+            op1 = op2
+        else:
+            t3 = readMaximalTerm()
+            assert len(t3) > 0
+            return [op1, t1, [op2, t2, t3]]
     return t1
 
 def createTerm(text):
@@ -103,7 +113,7 @@ def createTerm(text):
     return t
 
 def hasPrefixOperator(term):
-    return len(term) == 2 and term[0] in ["+", "-"]
+    return len(term) == 2 and term[0] in PREFIX_OPERATORS
 
 def term2str(term):
     r = ""
@@ -139,5 +149,7 @@ test("9   /3  ", "(9/3)")
 test("1+2+3", "((1+2)+3)")
 test("1-3+(7+9)", "((1-3)+(7+9))")
 test("1-3+7+9", "(((1-3)+7)+9)")
+test("1+3*7", "(1+(3*7))")
+test("1*2+3*4","((1*2)+(3*4))")
 
-createTerm("1+3*7")
+createTerm("1+2+3+4")     
